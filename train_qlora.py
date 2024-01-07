@@ -1,4 +1,5 @@
 from transformers import AutoTokenizer, BitsAndBytesConfig
+from transformers.integrations import is_deepspeed_zero3_enabled
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from transformers import (
     set_seed,
@@ -121,7 +122,8 @@ def init_components(args, training_args):
     # 加载模型
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
-        device_map=device_map,
+        device_map=device_map if not is_deepspeed_zero3_enabled() else None,
+        low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
         load_in_4bit=True,
         torch_dtype=torch.float16,
         trust_remote_code=True,

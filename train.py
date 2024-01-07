@@ -10,6 +10,7 @@ from os.path import join
 import torch
 from transformers import AutoTokenizer
 from transformers import AutoModelForCausalLM
+from transformers.integrations import is_deepspeed_zero3_enabled
 from component.collator import SFTDataCollator, PretrainCollator
 from component.dataset import (
     SFTDataset,
@@ -62,6 +63,8 @@ def init_components(args, training_args):
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
         torch_dtype=torch.float16,
+        device_map=device_map if not is_deepspeed_zero3_enabled() else None,
+        low_cpu_mem_usage=(not is_deepspeed_zero3_enabled()),
         trust_remote_code=True
     )
     # moe模型，需要考虑负载均衡的loss

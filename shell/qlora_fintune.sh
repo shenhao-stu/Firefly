@@ -1,0 +1,1 @@
+torchrun --nproc_per_node=4 train_qlora.py --train_args_file train_args/sft/sft_qlora.json
